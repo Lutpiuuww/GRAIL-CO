@@ -1,0 +1,5 @@
+@extends('layouts.backoffice')
+@section('title',($category->exists?'Edit':'Add').' Category — GRAIL.CO')
+@section('content')
+<section class="max-w-3xl px-4 py-8 sm:px-6 lg:px-8"><a href="{{ route('categories.index') }}" class="text-sm text-stone-400 hover:text-champagne-300">← Back to categories</a><div class="glass-panel mt-5 rounded-2xl p-6"><p class="eyebrow">{{ $category->exists?'Update record':'New record' }}</p><h1 class="mt-2 text-2xl font-semibold">{{ $category->exists?'Edit category':'Add category' }}</h1><form class="mt-7" method="POST" action="{{ $category->exists?route('categories.update',$category):route('categories.store') }}">@csrf @if($category->exists) @method('PUT') @endif<label class="block text-sm">Category name<input class="field mt-2" name="name" value="{{ old('name',$category->name) }}" required></label><div class="mt-7 flex gap-3"><button class="btn-gold">Save category</button><a class="btn-ghost" href="{{ route('categories.index') }}">Cancel</a></div></form></div></section>
+@endsection
