@@ -1,17 +1,43 @@
 import './bootstrap';
+import regions from '../data/indonesia-regions.json';
 
 document.querySelectorAll('[data-checkout-details]').forEach(form => {
     const address = form.querySelector('[data-delivery-address]');
+    const province = form.querySelector('[data-region-province]');
+    const city = form.querySelector('[data-region-city]');
+    const syncCities = (selected = '') => {
+        city.replaceChildren(new Option('Pilih kota / kabupaten', ''));
+        (regions[province.value] || []).forEach(name => city.add(new Option(name, name)));
+        if ((regions[province.value] || []).includes(selected)) city.value = selected;
+    };
     const update = () => {
         const pickup = form.querySelector('[name="delivery_method"]:checked')?.value === 'pickup';
         address.hidden = pickup;
-        address.querySelectorAll('input, textarea').forEach(input => {
+        address.querySelectorAll('input, textarea, select').forEach(input => {
             input.disabled = pickup;
             input.required = !pickup;
         });
+        city.disabled = pickup || !province.value;
     };
+    province.addEventListener('change', () => { syncCities(); update(); });
     form.querySelectorAll('[name="delivery_method"]').forEach(input => input.addEventListener('change', update));
+    syncCities(city.value);
     update();
+});
+
+document.querySelectorAll('[data-product-image-input]').forEach(input => {
+    const preview = document.querySelector('[data-product-image-preview]');
+    const placeholder = document.querySelector('[data-product-image-placeholder]');
+    let objectUrl = null;
+    input.addEventListener('change', () => {
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        objectUrl = input.files?.[0] ? URL.createObjectURL(input.files[0]) : null;
+        if (objectUrl) {
+            preview.src = objectUrl;
+            preview.classList.remove('hidden');
+            placeholder?.classList.add('hidden');
+        }
+    });
 });
 
 const logoutDialog = document.querySelector('#logout-dialog');

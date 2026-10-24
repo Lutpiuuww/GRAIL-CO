@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\IndonesianRegions;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,8 +23,8 @@ class CheckoutDetailsRequest extends FormRequest
             'delivery_method' => ['required', Rule::in(array_keys(config('checkout.delivery')))],
             'payment_method' => ['required', Rule::in(array_keys(config('checkout.payment')))],
             'address' => [...$address, 'min:10', 'max:500'],
-            'city' => [...$address, 'min:2', 'max:100'],
-            'province' => [...$address, 'min:2', 'max:100'],
+            'province' => [...$address, Rule::in(IndonesianRegions::provinces())],
+            'city' => [...$address, Rule::in(IndonesianRegions::cities($this->input('province')))],
             'postal_code' => ['exclude_if:delivery_method,pickup', 'required', 'regex:/^[0-9]{5}$/'],
             'notes' => ['nullable', 'string', 'max:500'],
         ];

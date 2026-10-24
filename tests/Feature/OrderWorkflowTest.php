@@ -31,7 +31,7 @@ class OrderWorkflowTest extends TestCase
     private function order(string $delivery = 'standard', string $payment = 'bank_transfer'): Sale
     {
         $this->actingAs($this->customer);
-        $token = $this->prepareCheckout([$this->product->id => 1], ['delivery_method' => $delivery, 'payment_method' => $payment, 'address' => 'Jalan Simulasi UTS 123', 'city' => 'Bandung', 'province' => 'Jawa Barat', 'postal_code' => '40111']);
+        $token = $this->prepareCheckout([$this->product->id => 1], ['delivery_method' => $delivery, 'payment_method' => $payment, 'address' => 'Jalan Simulasi UTS 123', 'city' => 'Kota Bandung', 'province' => 'Jawa Barat', 'postal_code' => '40111']);
         $this->post('/checkout', ['submission_token' => $token])->assertSessionHasNoErrors();
         $sale = Sale::latest('id')->firstOrFail();
         $this->actingAs($this->staff);

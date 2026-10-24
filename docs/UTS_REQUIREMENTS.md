@@ -14,10 +14,10 @@ Sumber: `UTS_Integrated_Laravel_Project_Final_Desain_Baru.pptx` yang diberikan d
 | Search, filter tanggal/status, pagination | Daftar produk dan riwayat transaksi | Ada |
 | Relasi Eloquent, FK, migration, seeder, ERD | `app/Models`, `database/migrations`, `database/seeders`, `docs/ERD.md` | Ada |
 | Pesan validasi, CSRF, escaping Blade | Form request, middleware web, output Blade | Ada |
-| Test skenario minimum | `tests/Feature`, `docs/UTS_TEST_MATRIX.md`; 55 test/566 assertions pada SQLite dan MariaDB QA | Ada |
+| Test skenario minimum | `tests/Feature`, `docs/UTS_TEST_MATRIX.md`; terbaru 59 test/608 assertions pada SQLite; 55 test/566 assertions pada MariaDB QA sebelum fitur wilayah/foto/arsip | Ada; perubahan terakhir belum diuji ulang di MariaDB |
 | Instalasi dari repository baru dengan MySQL | Langkah di README dan `.env.example` memakai MySQL; `migrate --seed --force` berhasil pada database MariaDB QA baru dengan 3 user, 5 kategori, 4 supplier, 8 produk | Migrasi dan seeder lulus; clone/dependency install bersih belum diuji |
 | Source code di GitHub | Repository Git lokal sudah dibuat; remote/unggahan GitHub belum ada | Belum |
-| Screenshot halaman utama dan transaksi | 20 screenshot login, dashboard, produk, Stock In, Sales, nota, validasi stok, customer, dan tampilan mobile pada `docs/screenshots/` | Ada; preview cetak belum diperiksa |
+| Screenshot halaman utama dan transaksi | 24 screenshot login, dashboard, produk, Stock In, Sales, nota, validasi stok, customer, alamat, dan admin pada `docs/screenshots/` | Ada; preview cetak belum diperiksa |
 | Demo dan wawancara kepemilikan kode | Alur dan pertanyaan dosen diketahui dari modul | Perlu latihan |
 
 ## Fokus penyelesaian sebelum pengumpulan
@@ -29,4 +29,4 @@ Sumber: `UTS_Integrated_Laravel_Project_Final_Desain_Baru.pptx` yang diberikan d
 
 ## Keputusan lingkup
 
-Payment gateway nyata, multi-warehouse, akuntansi penuh, mobile app terpisah, AI forecasting, ERP, dan multi-currency dinyatakan tidak wajib oleh modul. Fitur customer, katalog, cart, checkout, dan tracking simulasi tetap boleh ada sebagai tambahan; kualitas business rule Stock In/Sales tetap prioritas penilaian. Snapshot nama/SKU nota, upload foto, pemulihan arsip, dan retur adalah peningkatan yang bermanfaat, tetapi tidak tercantum sebagai syarat kelulusan minimal pada modul ini.
+Payment gateway, multi-warehouse, akuntansi penuh, mobile app terpisah, AI forecasting, ERP, dan multi-currency dinyatakan tidak wajib oleh modul. Fitur customer, katalog, cart, checkout, dan tracking tetap boleh ada sebagai tambahan; kualitas business rule Stock In/Sales tetap prioritas penilaian. Upload foto dan pemulihan arsip sudah tersedia; snapshot nama/SKU nota dan retur masih menjadi peningkatan opsional di luar syarat kelulusan minimal.

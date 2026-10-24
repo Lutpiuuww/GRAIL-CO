@@ -48,12 +48,28 @@ class CheckoutFlowTest extends TestCase
         $this->assertDatabaseCount('sales', 0);
     }
 
+    public function test_delivery_city_must_belong_to_selected_province(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'customer']));
+        $product = $this->product();
+        $this->withSession(['cart' => [$product->id => 1]])->get('/checkout')
+            ->assertOk()->assertSee('Pilih provinsi')->assertSee('Pilih kota / kabupaten');
+
+        $details = ['delivery_method' => 'standard', 'address' => 'Jalan Melati Nomor 12', 'province' => 'Jawa Barat', 'city' => 'Kota Surabaya', 'postal_code' => '40111'];
+        $this->post('/checkout/review', $this->checkoutData($details))->assertSessionHasErrors('city');
+        $this->post('/checkout/review', $this->checkoutData(array_replace($details, ['province' => 'Provinsi palsu'])))->assertSessionHasErrors(['province', 'city']);
+        $this->assertDatabaseCount('sales', 0);
+
+        $this->post('/checkout/review', $this->checkoutData(array_replace($details, ['city' => 'Kota Bandung'])))
+            ->assertSessionHasNoErrors()->assertRedirect('/checkout/review');
+    }
+
     public function test_review_and_confirmation_use_server_totals_and_store_delivery_details(): void
     {
         $customer = User::factory()->create(['role' => 'customer']);
         $this->actingAs($customer);
         $product = $this->product();
-        $details = ['delivery_method' => 'standard', 'payment_method' => 'bank_transfer', 'address' => 'Jalan Demo UTS nomor 12', 'city' => 'Bandung', 'province' => 'Jawa Barat', 'postal_code' => '40111', 'notes' => 'Patokan pagar hitam', 'shipping_cost' => 0, 'total' => 1, 'payment_status' => 'paid'];
+        $details = ['delivery_method' => 'standard', 'payment_method' => 'bank_transfer', 'address' => 'Jalan Demo UTS nomor 12', 'city' => 'Kota Bandung', 'province' => 'Jawa Barat', 'postal_code' => '40111', 'notes' => 'Patokan pagar hitam', 'shipping_cost' => 0, 'total' => 1, 'payment_status' => 'paid'];
         $token = $this->prepareCheckout([$product->id => 2], $details);
         $this->get('/checkout/review')->assertOk()->assertSee('Rp1.525.000')->assertSee('Jalan Demo UTS nomor 12')->assertSee('Buat pesanan');
         $this->assertSame(5, $product->fresh()->stock);

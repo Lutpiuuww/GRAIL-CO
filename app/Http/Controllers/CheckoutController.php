@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Services\CheckoutQuote;
 use App\Services\TransactionSubmission;
+use App\Support\IndonesianRegions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -23,7 +24,7 @@ class CheckoutController extends Controller
             return to_route('cart')->withErrors(['cart' => 'Cart kosong atau ada item yang tidak tersedia. Perbarui cart sebelum checkout.']);
         }
 
-        return view('checkout.form', ['quote' => $quote, 'details' => $request->session()->get('checkout.draft.details', [])]);
+        return view('checkout.form', ['quote' => $quote, 'details' => $request->session()->get('checkout.draft.details', []), 'regions' => IndonesianRegions::all()]);
     }
 
     public function prepare(CheckoutDetailsRequest $request): RedirectResponse

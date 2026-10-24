@@ -27,11 +27,10 @@
                 </fieldset>
                 @error('delivery_method')<p class="mt-2 text-sm text-red-300">{{ $message }}</p>@enderror
                 <div class="mt-6 space-y-5" data-delivery-address @if($delivery === 'pickup') hidden @endif>
-                    <label class="block text-sm">Alamat lengkap<textarea class="field mt-2" name="address" autocomplete="street-address" maxlength="500" rows="3" placeholder="Nama jalan, nomor rumah, RT/RW, dan kecamatan">{{ $value('address') }}</textarea>@error('address')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
-                    <div class="grid gap-5 sm:grid-cols-2">
-                        <label class="block text-sm">Kota / kabupaten<input class="field mt-2" name="city" autocomplete="address-level2" maxlength="100" value="{{ $value('city') }}">@error('city')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
-                        <label class="block text-sm">Provinsi<input class="field mt-2" name="province" autocomplete="address-level1" maxlength="100" value="{{ $value('province') }}">@error('province')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
-                    </div>
+                    <p class="text-sm leading-6 text-stone-300">Pilih wilayah pengiriman dari daftar, lalu lengkapi alamat jalan dan kode pos.</p>
+                    <label class="block text-sm">Provinsi<select class="field mt-2 cursor-pointer" name="province" autocomplete="address-level1" data-region-province><option value="">Pilih provinsi</option>@foreach(array_keys($regions) as $province)<option value="{{ $province }}" @selected($value('province') === $province)>{{ $province }}</option>@endforeach</select>@error('province')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
+                    <label class="block text-sm">Kota / kabupaten<select class="field mt-2 cursor-pointer" name="city" autocomplete="address-level2" data-region-city><option value="">Pilih kota / kabupaten</option>@foreach($regions[$value('province')] ?? [] as $city)<option value="{{ $city }}" @selected($value('city') === $city)>{{ $city }}</option>@endforeach</select>@error('city')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
+                    <label class="block text-sm">Alamat jalan dan nomor rumah<textarea class="field mt-2" name="address" autocomplete="street-address" maxlength="500" rows="3" placeholder="Nama jalan, nomor rumah, RT/RW, dan kecamatan">{{ $value('address') }}</textarea>@error('address')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
                     <label class="block text-sm">Kode pos<input class="field mt-2" name="postal_code" autocomplete="postal-code" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" value="{{ $value('postal_code') }}">@error('postal_code')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
                 </div>
                 <noscript><p class="mt-4 text-sm text-stone-300">Alamat hanya wajib diisi untuk metode pengiriman.</p></noscript>

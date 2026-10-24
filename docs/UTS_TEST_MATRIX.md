@@ -15,6 +15,9 @@
 | Checkout | Harga dimanipulasi di browser | Harga dihitung dari produk di server | GrailFlowTest |
 | Checkout bertahap | POST konfirmasi tanpa draft review | Ditolak tanpa menyimpan transaksi | CheckoutFlowTest |
 | Penerima | Kontak/alamat tidak valid untuk pengiriman | Validasi menolak; alamat tidak wajib untuk pickup | CheckoutFlowTest |
+| Wilayah | Kota/kabupaten tidak cocok dengan provinsi | Ditolak oleh server; daftar kota mengikuti provinsi | CheckoutFlowTest |
+| Foto produk | Admin mengunggah, mengganti, menghapus foto | Foto baru tampil; foto lama terhapus; file tidak valid ditolak | ProductMediaArchiveTest |
+| Arsip produk | Admin memulihkan produk; staff/customer mencoba akses | Stok tetap; produk aktif kembali; non-admin 403 | ProductMediaArchiveTest |
 | Biaya | Browser mengirim total/ongkir/status paid palsu | Total/ongkir dihitung server; pembayaran tetap pending | CheckoutFlowTest |
 | Review | Harga berubah atau jumlah cart berubah | Harus tinjau kembali; stok tidak berkurang | CheckoutFlowTest |
 | Konfirmasi | Request diulang setelah cart dikosongkan | Mengarah ke pesanan sama, tidak membuat sale baru | CheckoutFlowTest |
@@ -56,3 +59,5 @@ Update setelah fitur detail/logout: SQLite 38 test / 298 assertions lulus; Maria
 Update checkout bertahap: seluruh 45 test / 406 assertions lulus di SQLite dan MariaDB XAMPP 10.4.32. Probe dua proses memakai CheckoutController baru; satu checkout memperebutkan unit terakhir berhasil dan satu ditolak, stok akhir nol. Browser memverifikasi cart → checkout → tinjau, pengisian alamat contoh, perubahan pickup yang menyembunyikan alamat dan menghapus ongkir, serta layout review 375 px. Browser tidak mengonfirmasi pesanan pada database kerja; konfirmasi/success/nota diverifikasi melalui feature test pada database tes.
 
 Update workflow 21 Oktober 2026: SQLite dan MariaDB XAMPP 10.4.32 masing-masing 55 test / 566 assertions lulus, termasuk 10 test workflow baru. Kedua probe concurrency lulus; build Vite, Pint, dan kompilasi Blade lulus. Browser QA terpisah menampilkan nota, timeline awal, form pembayaran, dan tombol proses yang terkunci untuk transfer pending. Timeout kontrol browser menghalangi penyelesaian interaksi pembayaran dan pemeriksaan visual mobile baru; jangan menyamakan feature test yang lulus dengan QA browser end-to-end.
+
+Update wilayah/foto/arsip: 59 test / 608 assertions lulus pada SQLite. Build Vite, Pint, dan kompilasi Blade lulus. Browser QA memeriksa dropdown wilayah 375 px, form foto desktop/ponsel, dan halaman arsip kosong; foto tidak diunggah melalui browser QA. Uji MariaDB dan alur browser operator end-to-end setelah perubahan ini belum diulang.

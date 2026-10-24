@@ -27,7 +27,7 @@ $session->start();
 $session->put('cart', $cart);
 $session->put('checkout.draft', [
     'token' => $token, 'cart' => $cart, 'quote' => CheckoutQuote::make($cart, 'standard'),
-    'details' => ['recipient_name' => 'Customer Demo UTS', 'phone' => '081234567890', 'email' => $user->email, 'address' => 'Jalan Simulasi UTS nomor 12', 'city' => 'Bandung', 'province' => 'Jawa Barat', 'postal_code' => '40111', 'delivery_method' => 'standard', 'payment_method' => 'bank_transfer'],
+    'details' => ['recipient_name' => 'Customer Demo UTS', 'phone' => '081234567890', 'email' => $user->email, 'address' => 'Jalan Simulasi UTS nomor 12', 'city' => 'Kota Bandung', 'province' => 'Jawa Barat', 'postal_code' => '40111', 'delivery_method' => 'standard', 'payment_method' => 'bank_transfer'],
 ]);
 $request = Request::create('/checkout', 'POST', ['submission_token' => $token]);
 $request->setLaravelSession($session);

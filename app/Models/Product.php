@@ -11,7 +11,7 @@ class Product extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['category_id', 'sku', 'name', 'description', 'purchase_price', 'selling_price', 'stock', 'minimum_stock'];
+    protected $fillable = ['category_id', 'sku', 'name', 'description', 'purchase_price', 'selling_price', 'stock', 'minimum_stock', 'uploaded_image_path'];
 
     protected function casts(): array
     {
@@ -40,6 +40,10 @@ class Product extends Model
 
     public function getImagePathAttribute(): ?string
     {
+        if ($this->uploaded_image_path) {
+            return 'images/products/uploads/'.$this->uploaded_image_path;
+        }
+
         $path = 'images/products/'.strtolower($this->sku).'.webp';
 
         return file_exists(public_path($path)) ? $path : null;

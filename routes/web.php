@@ -57,6 +57,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::resource('users', UserController::class)->except(['show', 'destroy']);
         Route::resource('categories', CategoryController::class)->except('show');
+        Route::get('/products/archive', [ProductController::class, 'archive'])->name('products.archive');
+        Route::patch('/products/{product}/restore', [ProductController::class, 'restore'])->withTrashed()->name('products.restore');
         Route::resource('products', ProductController::class)->except(['index', 'show']);
         Route::resource('suppliers', SupplierController::class)->except(['index', 'show']);
         Route::patch('/purchases/{purchase}/cancel', [PurchaseController::class, 'cancel'])->name('purchases.cancel');

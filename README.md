@@ -9,10 +9,12 @@ Aplikasi retail archive streetwear dan luxury horology berbasis Laravel 12, PHP 
 - Admin mengelola kategori, supplier, produk, serta akun pengguna. Akun dapat dinonaktifkan tanpa menghapus riwayat; admin tidak bisa menonaktifkan atau menurunkan role sendiri.
 - Staff melihat produk/supplier serta mencatat Stock In dan penjualan kasir.
 - Dashboard keuangan admin dan dashboard operasional staff.
-- Katalog responsif, pencarian, filter kategori, delapan visual produk konseptual AI dalam format WebP.
+- Katalog responsif, pencarian, filter kategori, delapan visual produk studio komersial ultra-realistis dalam format WebP.
 - Detail produk publik melalui foto/nama/tombol Lihat detail, lengkap dengan deskripsi, stok, harga, pilihan jumlah, dan koleksi terkait.
+- Admin dapat mengunggah, mengganti, atau menghapus foto produk (JPG/PNG/WebP, maks. 4 MB). Foto unggahan ditampilkan di katalog; produk tanpa foto unggahan memakai gambar bawaan jika tersedia.
+- Admin dapat membuka arsip produk dan memulihkannya tanpa mengubah stok atau riwayat transaksi.
 - Cart dengan ubah jumlah, penanda produk habis/terarsip, serta checkout.
-- Checkout bertahap: data penerima dan alamat, pilihan pengiriman/pengambilan, metode pembayaran, tinjau rincian biaya, lalu konfirmasi pesanan dengan nomor nota.
+- Checkout bertahap: data penerima dan alamat, pilihan provinsi serta kota/kabupaten bertingkat, pengiriman/pengambilan, metode pembayaran, tinjau rincian biaya, lalu konfirmasi pesanan dengan nomor nota.
 - Biaya pengiriman yang ditetapkan aplikasi dihitung server: reguler Rp25.000, express Rp45.000, ambil di toko gratis. Tarif belum terhubung ke penyedia kurir. Pembayaran transfer/COD dimulai dengan status belum dikonfirmasi dan dicatat oleh petugas setelah verifikasi di luar aplikasi.
 - Transaksi multi-item dinamis, harga server-side, DB transaction, row locking, validasi stok, dan proteksi kiriman ulang menggunakan token.
 - Riwayat Stock In/Sales dengan pencarian nomor, filter tanggal/status, pagination, detail nota, dan tombol cetak melalui browser.
@@ -66,7 +68,9 @@ php artisan migrate
 npm.cmd run build
 ```
 
-Migrasi menambah kolom audit, status akun, dan tabel submission. Gunakan migrate biasa; migrate:fresh menghapus tabel. Seeder menambah data awal yang belum ada dan mempertahankan stok, password, role, status, serta produk terarsip yang sudah ada.
+Migrasi menambah kolom audit, status akun, tabel submission, dan lokasi foto unggahan. Gunakan migrate biasa; migrate:fresh menghapus tabel. Seeder menambah data awal yang belum ada dan mempertahankan stok, password, role, status, serta produk terarsip yang sudah ada.
+
+Foto yang diunggah admin tersimpan di `public/images/products/uploads` dan tidak masuk Git. Jika memindahkan instalasi dengan foto unggahan, cadangkan folder tersebut bersama database. Dataset dropdown wilayah tersedia secara lokal di `resources/data/indonesia-regions.json`; asal dan cara memperbaruinya ada di [catatan data wilayah](resources/data/README.md).
 
 Instalasi kerja saat ini tetap SQLite. Pengujian MariaDB dilakukan pada instance dan database QA terpisah; .env aplikasi tidak dipindahkan otomatis ke MySQL.
 
@@ -130,7 +134,7 @@ Nota menggunakan harga yang tersimpan di detail transaksi. Nama/SKU masih mengik
 ## Alur checkout customer
 
 1. Dari cart pilih **Lanjut ke checkout**.
-2. Isi nama penerima dan nomor telepon. Untuk pengiriman, isi alamat, kota/kabupaten, provinsi, dan kode pos lima digit; untuk ambil di toko, alamat tidak diminta.
+2. Isi nama penerima dan nomor telepon. Untuk pengiriman, pilih provinsi lalu kota/kabupaten dari daftar, kemudian isi alamat jalan serta kode pos lima digit. Untuk ambil di toko, alamat tidak diminta.
 3. Pilih metode pengiriman dan pembayaran, lalu tinjau pesanan. Halaman ini belum mengurangi stok atau membuat transaksi.
 4. Periksa subtotal, biaya pengiriman, total, dan data penerima. Konfirmasi melalui tombol **Buat pesanan**.
 5. Halaman keberhasilan menampilkan nomor pesanan, biaya, data penerima, dan tautan nota/My Orders. Data ini hanya dapat dibuka oleh pemilik pesanan; admin/staff melihat data melalui Sales.

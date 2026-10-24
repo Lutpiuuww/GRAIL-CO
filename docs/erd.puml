@@ -1,0 +1,179 @@
+@startuml ERD_GRAIL_CO
+!theme plain
+hide circle
+skinparam linetype ortho
+skinparam roundcorner 4
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2B2D42
+    ArrowColor #2B2D42
+}
+
+entity "users" as users {
+    * id : bigint <<PK>>
+    --
+    * name : varchar(255)
+    * email : varchar(255) <<UK>>
+    * password : varchar(255)
+    * role : enum('admin','staff','customer')
+    * is_active : boolean
+    email_verified_at : timestamp
+    remember_token : varchar(100)
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity "categories" as categories {
+    * id : bigint <<PK>>
+    --
+    * name : varchar(255) <<UK>>
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity "suppliers" as suppliers {
+    * id : bigint <<PK>>
+    --
+    * name : varchar(255)
+    phone : varchar(255)
+    email : varchar(255)
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity "products" as products {
+    * id : bigint <<PK>>
+    --
+    * category_id : bigint <<FK>>
+    * sku : varchar(255) <<UK>>
+    * name : varchar(255)
+    description : text
+    * purchase_price : decimal(15,2)
+    * selling_price : decimal(15,2)
+    * stock : int
+    * minimum_stock : int
+    uploaded_image_path : varchar(255)
+    deleted_at : timestamp
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity "purchases" as purchases {
+    * id : bigint <<PK>>
+    --
+    * supplier_id : bigint <<FK>>
+    * user_id : bigint <<FK>>
+    cancelled_by : bigint <<FK>>
+    * purchase_number : varchar(255) <<UK>>
+    * total : decimal(15,2)
+    * status : enum('completed','cancelled')
+    * purchased_at : timestamp
+    cancelled_at : timestamp
+    cancellation_reason : text
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity "purchase_items" as purchase_items {
+    * id : bigint <<PK>>
+    --
+    * purchase_id : bigint <<FK>>
+    * product_id : bigint <<FK>>
+    * quantity : int
+    * unit_cost : decimal(15,2)
+    * subtotal : decimal(15,2)
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity "sales" as sales {
+    * id : bigint <<PK>>
+    --
+    * user_id : bigint <<FK>>
+    cancelled_by : bigint <<FK>>
+    paid_by : bigint <<FK>>
+    * sale_number : varchar(255) <<UK>>
+    * total : decimal(15,2)
+    * status : enum('completed','cancelled')
+    * sold_at : timestamp
+    cancelled_at : timestamp
+    cancellation_reason : text
+    checkout_token : uuid <<UK>>
+    delivery_details : json
+    delivery_method : varchar(30)
+    shipping_cost : decimal(15,2)
+    payment_method : varchar(30)
+    payment_status : varchar(30)
+    fulfillment_status : varchar(30)
+    order_version : int
+    payment_reference : varchar(80)
+    paid_at : timestamp
+    refunded_at : timestamp
+    carrier : varchar(100)
+    tracking_number : varchar(100)
+    pickup_location : varchar(500)
+    pickup_at : timestamp
+    shipped_at : timestamp
+    ready_at : timestamp
+    completed_at : timestamp
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity "sale_items" as sale_items {
+    * id : bigint <<PK>>
+    --
+    * sale_id : bigint <<FK>>
+    * product_id : bigint <<FK>>
+    * quantity : int
+    * unit_price : decimal(15,2)
+    * subtotal : decimal(15,2)
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity "order_events" as order_events {
+    * id : bigint <<PK>>
+    --
+    * sale_id : bigint <<FK>>
+    * user_id : bigint <<FK>>
+    * type : varchar(40)
+    from_status : varchar(30)
+    to_status : varchar(30)
+    note : text
+    details : json
+    * created_at : timestamp
+}
+
+entity "transaction_submissions" as transaction_submissions {
+    * id : bigint <<PK>>
+    --
+    * user_id : bigint <<FK>>
+    * scope : varchar(30)
+    * token : uuid
+    * created_at : timestamp
+}
+
+' Relasi Antar Entitas (Crow's Foot Notation)
+categories ||--o{ products : "mengelompokkan"
+suppliers ||--o{ purchases : "memasok"
+
+users ||--o{ purchases : "mencatat"
+users |o--o{ purchases : "membatalkan"
+
+users ||--o{ sales : "memiliki / mencatat"
+users |o--o{ sales : "membatalkan"
+users |o--o{ sales : "memvalidasi bayar"
+
+purchases ||--|{ purchase_items : "memuat"
+products ||--o{ purchase_items : "diterima"
+
+sales ||--|{ sale_items : "memuat"
+products ||--o{ sale_items : "dijual"
+
+sales ||--o{ order_events : "mencatat status"
+users ||--o{ order_events : "melakukan aksi"
+
+users ||--o{ transaction_submissions : "mencegah duplikasi"
+
+@enduml
