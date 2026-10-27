@@ -122,6 +122,49 @@ class OrderWorkflowTest extends TestCase
         $this->assertSame(0, $sale->events()->count());
     }
 
+    public function test_customer_can_cancel_unconfirmed_order_and_restore_stock_once(): void
+    {
+        $sale = $this->order();
+        $this->actingAs($this->customer);
+        $this->get('/checkout/success/'.$sale->id)->assertOk()->assertSee('Batalkan pesanan');
+        $this->get('/my-orders')->assertOk()->assertSee('Batalkan pesanan');
+        $this->get('/my-orders/'.$sale->id)->assertOk()->assertSee('Batalkan pesanan');
+
+        $this->patch('/my-orders/'.$sale->id.'/cancel', ['version' => 0])->assertRedirect('/my-orders/'.$sale->id)->assertSessionHasNoErrors();
+        $this->assertSame(10, $this->product->fresh()->stock);
+        $this->assertSame('cancelled', $sale->fresh()->status);
+        $this->assertSame('cancelled', $sale->fresh()->fulfillment_status);
+        $this->assertSame('pending', $sale->fresh()->payment_status);
+        $this->assertSame($this->customer->id, $sale->fresh()->cancelled_by);
+        $this->assertSame(1, $sale->events()->where('type', 'cancelled')->count());
+        $this->get('/my-orders/'.$sale->id)->assertOk()->assertDontSee('Batalkan pesanan');
+
+        $this->patch('/my-orders/'.$sale->id.'/cancel', ['version' => 1])->assertSessionHasErrors('order');
+        $this->assertSame(10, $this->product->fresh()->stock);
+        $this->assertSame(1, $sale->events()->count());
+    }
+
+    public function test_customer_cancel_requires_ownership_and_seller_has_not_confirmed(): void
+    {
+        $sale = $this->order();
+        $other = User::factory()->create(['role' => 'customer']);
+        $this->actingAs($other)->patch('/my-orders/'.$sale->id.'/cancel', ['version' => 0])->assertNotFound();
+        $this->actingAs($this->customer)->patch('/my-orders/'.$sale->id.'/cancel', ['version' => 1])->assertSessionHasErrors('order');
+        $this->assertSame(9, $this->product->fresh()->stock);
+
+        $this->actingAs($this->staff);
+        $this->payment($sale);
+        $this->actingAs($this->customer)->get('/checkout/success/'.$sale->id)->assertOk()->assertDontSee('Batalkan pesanan');
+        $this->patch('/my-orders/'.$sale->id.'/cancel', ['version' => 1])->assertSessionHasErrors('order');
+        $this->assertSame('completed', $sale->fresh()->status);
+        $this->assertSame(9, $this->product->fresh()->stock);
+
+        $cod = $this->order('pickup', 'cod');
+        $this->advance($cod, 'processing');
+        $this->actingAs($this->customer)->patch('/my-orders/'.$cod->id.'/cancel', ['version' => 1])->assertSessionHasErrors('order');
+        $this->assertSame('completed', $cod->fresh()->status);
+    }
+
     public function test_wrong_method_skipped_steps_and_missing_tracking_are_rejected(): void
     {
         $sale = $this->order('pickup', 'cod');

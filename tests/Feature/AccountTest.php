@@ -38,13 +38,16 @@ class AccountTest extends TestCase
         $user = User::factory()->create(['role' => 'customer']);
         $other = User::factory()->create();
         $this->actingAs($user)->get('/profile')->assertOk()->assertSee('Keluar dari akun');
-        $data = ['name' => 'New name', 'email' => 'updated@example.test', 'current_password' => 'password'];
+        $data = ['name' => 'New name', 'email' => 'updated@example.test', 'phone' => '081234567890', 'street_address' => 'Jalan Merdeka Nomor 10', 'current_password' => 'password'];
         $this->patch('/profile', $data + ['role' => 'admin', 'id' => $other->id])->assertSessionHasNoErrors();
         $this->assertSame('customer', $user->fresh()->role);
         $this->assertSame('updated@example.test', $user->fresh()->email);
+        $this->assertSame('081234567890', $user->fresh()->phone);
+        $this->assertSame('Jalan Merdeka Nomor 10', $user->fresh()->street_address);
         $this->assertNotSame('New name', $other->fresh()->name);
         $this->patch('/profile', array_replace($data, ['email' => $other->email]))->assertSessionHasErrors('email');
         $this->patch('/profile', array_replace($data, ['current_password' => 'wrong']))->assertSessionHasErrors('current_password');
+        $this->patch('/profile', array_replace($data, ['phone' => 'bukan nomor']))->assertSessionHasErrors('phone');
     }
 
     public function test_password_change_requires_current_password_and_confirmation(): void
@@ -58,6 +61,20 @@ class AccountTest extends TestCase
         $this->put('/profile/password', $data)->assertSessionHasNoErrors();
         $this->assertTrue(Hash::check('new-secret-123', $user->fresh()->password));
         $this->assertFalse(Hash::check('password', $user->fresh()->password));
+    }
+
+    public function test_profile_contact_can_be_saved_without_password_but_email_change_requires_it(): void
+    {
+        $user = User::factory()->create(['role' => 'customer']);
+        $this->actingAs($user)->patch('/profile', [
+            'name' => 'Luthfi', 'email' => $user->email,
+            'phone' => '081234567890', 'street_address' => 'Jalan Merdeka Nomor 10',
+        ])->assertSessionHasNoErrors();
+        $this->assertSame('Luthfi', $user->fresh()->name);
+        $this->assertSame('081234567890', $user->fresh()->phone);
+
+        $this->patch('/profile', ['name' => 'Luthfi', 'email' => 'baru@example.test'])->assertSessionHasErrors('current_password');
+        $this->assertSame($user->email, $user->fresh()->email);
     }
 
     public function test_login_is_limited_after_five_failures_and_recovers_after_timeout(): void

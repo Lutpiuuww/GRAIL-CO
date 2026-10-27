@@ -46,6 +46,7 @@
             </section>
         @endif
     </article>
+    @if(!$isOffice && !$isPurchase && $record->checkout_token) @include('orders.cancel-form', ['sale' => $record]) @endif
     @if($isOffice && !$isPurchase) @include('backoffice.transactions.order-management', ['sale' => $record]) @endif
     @if($isOffice && auth()->user()->role === 'admin' && ($isPurchase ? $record->status === 'completed' : $record->canBeVoided()))
         <details class="mt-6 rounded-2xl border border-red-400/30 p-5 print:hidden" @if($errors->has('cancellation_reason')) open @endif>

@@ -38,6 +38,15 @@ class CheckoutFlowTest extends TestCase
         $this->assertSame(5, $product->fresh()->stock);
     }
 
+    public function test_checkout_prefills_saved_profile_contact_and_street_address(): void
+    {
+        $user = User::factory()->create(['role' => 'customer', 'phone' => '081234567890', 'street_address' => 'Jalan Merdeka Nomor 10']);
+        $product = $this->product();
+
+        $this->actingAs($user)->withSession(['cart' => [$product->id => 1]])->get('/checkout')
+            ->assertOk()->assertSee('value="081234567890"', false)->assertSee('Jalan Merdeka Nomor 10');
+    }
+
     public function test_shipping_address_and_valid_contact_are_required_for_delivery(): void
     {
         $this->actingAs(User::factory()->create(['role' => 'customer']));

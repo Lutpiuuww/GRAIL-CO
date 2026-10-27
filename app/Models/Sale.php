@@ -71,4 +71,12 @@ class Sale extends Model
     {
         return $this->status === 'completed' && (! $this->checkout_token || in_array($this->fulfillment_status ?? 'pending', ['pending', 'processing'], true));
     }
+
+    public function canCustomerCancel(): bool
+    {
+        return (bool) $this->checkout_token
+            && $this->status === 'completed'
+            && ($this->fulfillment_status ?? 'pending') === 'pending'
+            && $this->payment_status === 'pending';
+    }
 }

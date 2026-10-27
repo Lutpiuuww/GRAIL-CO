@@ -4,7 +4,7 @@ Aplikasi retail archive streetwear dan luxury horology berbasis Laravel 12, PHP 
 
 ## Fitur
 
-- Login dengan pembatasan percobaan, registrasi customer, konfirmasi logout semua role, profil, dan penggantian password.
+- Login dengan pembatasan percobaan, registrasi customer, konfirmasi logout semua role, profil dengan kontak/alamat jalan tersimpan, dan penggantian password.
 - Tiga role dilindungi middleware server: admin, staff, customer.
 - Admin mengelola kategori, supplier, produk, serta akun pengguna. Akun dapat dinonaktifkan tanpa menghapus riwayat; admin tidak bisa menonaktifkan atau menurunkan role sendiri.
 - Staff melihat produk/supplier serta mencatat Stock In dan penjualan kasir.
@@ -14,6 +14,7 @@ Aplikasi retail archive streetwear dan luxury horology berbasis Laravel 12, PHP 
 - Admin dapat mengunggah, mengganti, atau menghapus foto produk (JPG/PNG/WebP, maks. 4 MB). Foto unggahan ditampilkan di katalog; produk tanpa foto unggahan memakai gambar bawaan jika tersedia.
 - Admin dapat membuka arsip produk dan memulihkannya tanpa mengubah stok atau riwayat transaksi.
 - Cart dengan ubah jumlah, penanda produk habis/terarsip, serta checkout.
+- Customer dapat membatalkan pesanan sebelum pembayaran atau proses pesanan dikonfirmasi penjual; stok dikembalikan dan pembatalan dicatat.
 - Checkout bertahap: data penerima dan alamat, pilihan provinsi serta kota/kabupaten bertingkat, pengiriman/pengambilan, metode pembayaran, tinjau rincian biaya, lalu konfirmasi pesanan dengan nomor nota.
 - Biaya pengiriman yang ditetapkan aplikasi dihitung server: reguler Rp25.000, express Rp45.000, ambil di toko gratis. Tarif belum terhubung ke penyedia kurir. Pembayaran transfer/COD dimulai dengan status belum dikonfirmasi dan dicatat oleh petugas setelah verifikasi di luar aplikasi.
 - Transaksi multi-item dinamis, harga server-side, DB transaction, row locking, validasi stok, dan proteksi kiriman ulang menggunakan token.
@@ -122,11 +123,7 @@ Jalankan pada terminal pengujian terpisah. RefreshDatabase membangun ulang datab
 
 ## Dokumentasi
 
-- [ERD dan relasi](docs/ERD.md)
-- [Matriks pengujian](docs/UTS_TEST_MATRIX.md)
-- [Catatan kemajuan dan batas verifikasi](UTS_PROGRESS.md)
-- [Checklist kebutuhan modul dan kesiapan pengumpulan](docs/UTS_REQUIREMENTS.md)
-- [Panduan presentasi dan tanya jawab kode](docs/UTS_DEMO_GUIDE.md)
+- [ERD dan relasi](docs/ERD_GRAIL.CO.png)
 - [Bukti screenshot halaman dan transaksi](docs/screenshots/README.md)
 
 Nota menggunakan harga yang tersimpan di detail transaksi. Nama/SKU masih mengikuti data produk saat ini; identitas pembeli offline belum dipisahkan dari petugas kasir. Tombol cetak memakai dialog cetak browser, bukan generator PDF server.
@@ -142,6 +139,8 @@ Nota menggunakan harga yang tersimpan di detail transaksi. Nama/SKU masih mengik
 Harga atau isi cart yang berubah setelah ditinjau memerlukan peninjauan ulang. Stok diperiksa dengan row lock pada konfirmasi terakhir. Kiriman ulang token yang sudah selesai kembali ke pesanan yang sama, termasuk jika cart sudah kosong.
 
 Pesanan baru memakai status pembayaran `pending` dan tampilan **Menunggu konfirmasi**. Pembayaran yang belum dikonfirmasi tidak masuk metrik Revenue. Belum ada payment gateway, penagihan otomatis, booking kurir, atau notifikasi email. Instruksi dan verifikasi pembayaran serta pengiriman ditangani di luar aplikasi.
+
+Customer dapat membatalkan pesanan melalui halaman sukses, My Orders, atau detail nota selama pembayaran dan progres pesanan masih `pending`. Aplikasi memeriksa status terkini dalam transaksi database, mengembalikan stok satu kali, lalu mencatat pembatalan. Setelah penjual mencatat pembayaran atau memulai proses, tombol pembatalan customer tidak tersedia.
 
 ## Pengelolaan pesanan setelah checkout
 

@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout/success/{sale}', [CheckoutController::class, 'success'])->name('checkout.success');
     Route::get('/my-orders', OrderController::class)->name('orders');
     Route::get('/my-orders/{sale}', [OrderController::class, 'show'])->name('orders.show');
+    Route::patch('/my-orders/{sale}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/dashboard', DashboardController::class)->middleware('role:admin,staff')->name('dashboard');
 
     Route::middleware('role:admin,staff')->group(function () {

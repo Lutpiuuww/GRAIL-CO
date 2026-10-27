@@ -19,9 +19,11 @@ class ProfileController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($request->user()->id)],
-            'current_password' => ['required', 'current_password'],
+            'phone' => ['nullable', 'string', 'regex:/^\+?[0-9][0-9 ()-]{7,19}$/'],
+            'street_address' => ['nullable', 'string', 'min:10', 'max:500'],
+            'current_password' => [Rule::requiredIf(fn () => $request->input('email') !== $request->user()->email), 'nullable', 'current_password'],
         ]);
-        $request->user()->update(collect($data)->only(['name', 'email'])->all());
+        $request->user()->update(collect($data)->only(['name', 'email', 'phone', 'street_address'])->all());
 
         return back()->with('success', 'Profil berhasil diperbarui.');
     }

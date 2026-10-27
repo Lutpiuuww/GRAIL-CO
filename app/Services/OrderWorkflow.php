@@ -89,9 +89,7 @@ class OrderWorkflow
             if (! $sale->canBeVoided()) {
                 throw ValidationException::withMessages(['sale' => 'Transaksi sudah dibatalkan atau barang sudah dikirim/siap diambil/selesai. Pembatalan langsung tidak tersedia; fitur retur belum tersedia.']);
             }
-            foreach ($sale->items()->orderBy('product_id')->get() as $item) {
-                Product::withTrashed()->lockForUpdate()->findOrFail($item->product_id)->increment('stock', $item->quantity);
-            }
+            $this->restoreStock($sale);
             $from = $sale->fulfillment_status ?? 'pending';
             $updates = ['status' => 'cancelled', 'cancelled_by' => $actor->id, 'cancelled_at' => now(), 'cancellation_reason' => $reason, 'order_version' => $sale->order_version + 1];
             if ($sale->checkout_token) {
@@ -105,5 +103,38 @@ class OrderWorkflow
                 $this->event($sale, $actor, 'cancelled', $from, 'cancelled', $reason, ['payment_status' => $sale->payment_status]);
             }
         });
+    }
+
+    public function cancelByCustomer(User $actor, Sale $sale, int $version): void
+    {
+        DB::transaction(function () use ($actor, $sale, $version) {
+            $actor = User::lockForUpdate()->findOrFail($actor->id);
+            abort_unless($actor->is_active, 403);
+            $sale = Sale::lockForUpdate()->findOrFail($sale->id);
+            abort_unless($sale->user_id === $actor->id && $sale->checkout_token, 404);
+
+            if ($sale->order_version !== $version) {
+                throw ValidationException::withMessages(['order' => 'Status pesanan berubah. Muat ulang halaman sebelum membatalkan.']);
+            }
+            if (! $sale->canCustomerCancel()) {
+                throw ValidationException::withMessages(['order' => 'Pesanan sudah dikonfirmasi atau dibatalkan. Hubungi penjual jika masih perlu bantuan.']);
+            }
+
+            $this->restoreStock($sale);
+            $reason = 'Dibatalkan oleh customer sebelum dikonfirmasi penjual.';
+            $sale->forceFill([
+                'status' => 'cancelled', 'fulfillment_status' => 'cancelled',
+                'cancelled_by' => $actor->id, 'cancelled_at' => now(),
+                'cancellation_reason' => $reason, 'order_version' => $sale->order_version + 1,
+            ])->save();
+            $this->event($sale, $actor, 'cancelled', 'pending', 'cancelled', $reason);
+        });
+    }
+
+    private function restoreStock(Sale $sale): void
+    {
+        foreach ($sale->items()->orderBy('product_id')->get() as $item) {
+            Product::withTrashed()->lockForUpdate()->findOrFail($item->product_id)->increment('stock', $item->quantity);
+        }
     }
 }

@@ -4,15 +4,17 @@
 <section class="mx-auto max-w-4xl px-4 py-8 sm:py-12">
     <p class="eyebrow">Your collector account</p>
     <h1 class="mt-3 text-3xl font-semibold">Profil saya</h1>
-    <p class="mt-2 text-sm text-stone-300">Kelola identitas dan keamanan akun. Peran akun: {{ ucfirst($user->role) }}.</p>
+    <p class="mt-2 text-sm text-stone-300">Kelola identitas, kontak, dan keamanan akun. Peran akun: {{ ucfirst($user->role) }}.</p>
     <div class="mt-8 grid gap-6 md:grid-cols-2">
         <form method="POST" action="{{ route('profile.update') }}" class="glass-panel space-y-5 rounded-2xl p-6">
             @csrf @method('PATCH')
             <h2 class="text-xl font-semibold">Informasi pribadi</h2>
             <label class="block text-sm">Nama lengkap<input name="name" class="field mt-2" value="{{ old('name', $user->name) }}" autocomplete="name" maxlength="100" required></label>
             <label class="block text-sm">Email<input type="email" name="email" class="field mt-2" value="{{ old('email', $user->email) }}" autocomplete="email" maxlength="255" required></label>
-            <label class="block text-sm">Kata sandi saat ini<input type="password" name="current_password" class="field mt-2" autocomplete="current-password" required></label>
-            <p class="text-sm text-stone-300">Masukkan kata sandi untuk mengonfirmasi perubahan identitas.</p>
+            <label class="block text-sm">Nomor telepon <span class="text-stone-400">(opsional)</span><input type="tel" name="phone" class="field mt-2" value="{{ old('phone', $user->phone) }}" autocomplete="tel" maxlength="21" placeholder="Contoh: 081234567890">@error('phone')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
+            <label class="block text-sm">Alamat jalan <span class="text-stone-400">(opsional)</span><textarea name="street_address" class="field mt-2" autocomplete="street-address" maxlength="500" rows="3" placeholder="Nama jalan, nomor rumah, RT/RW, dan kecamatan">{{ old('street_address', $user->street_address) }}</textarea>@error('street_address')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
+            <p class="text-sm text-stone-300">Kontak dan alamat jalan akan terisi otomatis saat checkout. Provinsi, kota, dan kode pos tetap dipilih saat memesan.</p>
+            <label class="block text-sm">Kata sandi saat ini <span class="text-stone-400">(hanya jika mengganti email)</span><input type="password" name="current_password" class="field mt-2" autocomplete="current-password">@error('current_password')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
             <button class="btn-gold min-h-11 w-full">Simpan profil</button>
         </form>
         <form method="POST" action="{{ route('profile.password') }}" class="glass-panel space-y-5 rounded-2xl p-6">
