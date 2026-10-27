@@ -113,7 +113,7 @@ class ProductController extends Controller
             'name' => ['required', 'string', 'max:150'], 'description' => ['nullable', 'string', 'max:1000'],
             'purchase_price' => ['required', 'numeric', 'min:0'], 'selling_price' => ['required', 'numeric', 'gte:purchase_price'],
             'stock' => ['prohibited'], 'minimum_stock' => ['required', 'integer', 'min:0'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096', 'dimensions:min_width=400,min_height=400,max_width=4000,max_height=4000'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:20480', 'dimensions:min_width=1,min_height=1'],
             'remove_image' => ['sometimes', 'boolean'],
         ]);
     }

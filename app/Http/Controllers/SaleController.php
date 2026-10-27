@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Services\OrderWorkflow;
 use App\Services\TransactionSubmission;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -16,6 +17,22 @@ use Illuminate\View\View;
 
 class SaleController extends Controller
 {
+    public function updates(): JsonResponse
+    {
+        $summary = Sale::query()
+            ->selectRaw('COALESCE(MAX(id), 0) AS latest_sale_id')
+            ->selectRaw('COALESCE(MAX(CASE WHEN checkout_token IS NOT NULL THEN id END), 0) AS latest_order_id')
+            ->selectRaw("COALESCE(SUM(CASE WHEN checkout_token IS NOT NULL AND status = 'completed' AND fulfillment_status = 'pending' THEN 1 ELSE 0 END), 0) AS pending_orders")
+            ->selectRaw('COALESCE(SUM(order_version), 0) AS version_total')
+            ->first();
+
+        return response()->json([
+            'pending_count' => (int) $summary->pending_orders,
+            'latest_order_id' => (int) $summary->latest_order_id,
+            'revision' => (int) $summary->latest_sale_id.':'.(int) $summary->version_total,
+        ])->header('Cache-Control', 'no-store');
+    }
+
     public function index(TransactionFilterRequest $request): View
     {
         $filters = $request->validated();

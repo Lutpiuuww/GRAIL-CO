@@ -26,7 +26,18 @@
     <a href="{{ route('catalog') }}" class="btn-ghost min-h-11 text-sm">Catalog</a>
     <form method="POST" action="{{ route('logout') }}" data-logout>@csrf<button class="btn-ghost min-h-11 text-sm">Logout</button></form>
 </nav>
-@if(session('success'))<div class="mx-4 mt-4 rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-300 sm:mx-6 lg:mx-8">{{ session('success') }}</div>@endif
-@if($errors->any())<div class="mx-4 mt-4 rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300 sm:mx-6 lg:mx-8">{{ $errors->first() }}</div>@endif
-<main>@yield('content')</main></div>@include('components.logout-dialog')
+<div class="mx-4 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-champagne-400/20 bg-champagne-400/5 px-4 py-3 text-sm sm:mx-6 lg:mx-8" data-sales-live data-updates-url="{{ route('sales.updates') }}">
+    <a href="{{ route('sales.index', ['fulfillment' => 'pending']) }}" class="inline-flex min-h-11 items-center gap-3 text-champagne-300 hover:text-white">
+        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Pesanan menunggu</span><strong class="grid min-w-6 place-items-center rounded-full bg-champagne-400 px-1.5 py-0.5 font-mono text-xs text-obsidian-950" data-sales-pending-count aria-label="Jumlah pesanan menunggu">…</strong>
+    </a>
+    <span class="text-xs text-stone-400" data-sales-live-status>Memeriksa pembaruan otomatis</span>
+</div>
+<div class="notice-card fixed bottom-5 left-4 right-4 z-[70] max-w-sm border-champagne-400/40 sm:left-auto sm:right-6" data-sales-toast role="status" hidden>
+    <span class="grid size-10 shrink-0 place-items-center rounded-xl border border-champagne-400/25 bg-champagne-400/10 text-champagne-300"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></span>
+    <div class="min-w-0 flex-1"><p class="font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-champagne-400">Pesanan baru</p><p class="mt-1 text-sm leading-5 text-stone-100" data-sales-toast-message></p></div>
+    <button type="button" class="notice-close" data-sales-toast-close aria-label="Tutup pemberitahuan"><svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></svg></button>
+</div>
+@include('components.flash-messages')
+<main>@yield('content')</main></div>@include('components.logout-dialog')@include('components.confirm-dialog')
 </body></html>

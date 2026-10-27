@@ -4,21 +4,22 @@ Aplikasi retail archive streetwear dan luxury horology berbasis Laravel 12, PHP 
 
 ## Fitur
 
-- Login dengan pembatasan percobaan, registrasi customer, konfirmasi logout semua role, profil dengan kontak/alamat jalan tersimpan, dan penggantian password.
+- Login dengan pembatasan percobaan, registrasi customer, konfirmasi logout semua role, profil dengan kontak/alamat utama tersimpan, dan penggantian password.
 - Tiga role dilindungi middleware server: admin, staff, customer.
 - Admin mengelola kategori, supplier, produk, serta akun pengguna. Akun dapat dinonaktifkan tanpa menghapus riwayat; admin tidak bisa menonaktifkan atau menurunkan role sendiri.
 - Staff melihat produk/supplier serta mencatat Stock In dan penjualan kasir.
 - Dashboard keuangan admin dan dashboard operasional staff.
 - Katalog responsif, pencarian, filter kategori, delapan visual produk studio komersial ultra-realistis dalam format WebP.
 - Detail produk publik melalui foto/nama/tombol Lihat detail, lengkap dengan deskripsi, stok, harga, pilihan jumlah, dan koleksi terkait.
-- Admin dapat mengunggah, mengganti, atau menghapus foto produk (JPG/PNG/WebP, maks. 4 MB). Foto unggahan ditampilkan di katalog; produk tanpa foto unggahan memakai gambar bawaan jika tersedia.
+- Admin dapat mengunggah, mengganti, atau menghapus foto produk. Foto yang didukung browser dipotong otomatis di tengah dengan rasio 4:5, diperkecil menjadi 800 × 1000 px, lalu dikirim sebagai WebP (atau PNG jika WebP tidak tersedia). Tidak ada batas dimensi foto asal; validasi server menerima JPG/PNG/WebP hingga 20 MB. Foto unggahan ditampilkan di katalog; produk tanpa foto unggahan memakai gambar bawaan jika tersedia.
 - Admin dapat membuka arsip produk dan memulihkannya tanpa mengubah stok atau riwayat transaksi.
 - Cart dengan ubah jumlah, penanda produk habis/terarsip, serta checkout.
 - Customer dapat membatalkan pesanan sebelum pembayaran atau proses pesanan dikonfirmasi penjual; stok dikembalikan dan pembatalan dicatat.
-- Checkout bertahap: data penerima dan alamat, pilihan provinsi serta kota/kabupaten bertingkat, pengiriman/pengambilan, metode pembayaran, tinjau rincian biaya, lalu konfirmasi pesanan dengan nomor nota.
+- Checkout bertahap: data penerima, alamat utama dari profil atau alamat lain, pengiriman/pengambilan, metode pembayaran, tinjau rincian biaya, lalu konfirmasi pesanan dengan nomor nota.
 - Biaya pengiriman yang ditetapkan aplikasi dihitung server: reguler Rp25.000, express Rp45.000, ambil di toko gratis. Tarif belum terhubung ke penyedia kurir. Pembayaran transfer/COD dimulai dengan status belum dikonfirmasi dan dicatat oleh petugas setelah verifikasi di luar aplikasi.
 - Transaksi multi-item dinamis, harga server-side, DB transaction, row locking, validasi stok, dan proteksi kiriman ulang menggunakan token.
 - Riwayat Stock In/Sales dengan pencarian nomor, filter tanggal/status, pagination, detail nota, dan tombol cetak melalui browser.
+- Back office menampilkan jumlah pesanan menunggu dan pemberitahuan pesanan baru. Daftar Sales diperbarui otomatis tiap 5 detik selama halaman terbuka tanpa memuat ulang seluruh browser.
 - Void khusus admin: alasan wajib, petugas/waktu tercatat, stok disesuaikan secara atomik.
 - Customer hanya melihat riwayat dan nota miliknya sendiri; produk terarsip tetap terbaca pada nota.
 
@@ -131,7 +132,7 @@ Nota menggunakan harga yang tersimpan di detail transaksi. Nama/SKU masih mengik
 ## Alur checkout customer
 
 1. Dari cart pilih **Lanjut ke checkout**.
-2. Isi nama penerima dan nomor telepon. Untuk pengiriman, pilih provinsi lalu kota/kabupaten dari daftar, kemudian isi alamat jalan serta kode pos lima digit. Untuk ambil di toko, alamat tidak diminta.
+2. Nama dan nomor telepon terisi dari profil bila tersedia. Untuk pengiriman, gunakan alamat utama yang sudah lengkap di profil atau pilih **Kirim ke alamat lain** untuk mengisi provinsi, kota/kabupaten, alamat jalan, dan kode pos lima digit. Untuk ambil di toko, alamat tidak diminta.
 3. Pilih metode pengiriman dan pembayaran, lalu tinjau pesanan. Halaman ini belum mengurangi stok atau membuat transaksi.
 4. Periksa subtotal, biaya pengiriman, total, dan data penerima. Konfirmasi melalui tombol **Buat pesanan**.
 5. Halaman keberhasilan menampilkan nomor pesanan, biaya, data penerima, dan tautan nota/My Orders. Data ini hanya dapat dibuka oleh pemilik pesanan; admin/staff melihat data melalui Sales.

@@ -4,6 +4,9 @@
 @php
     $value = fn ($key, $default = '') => is_scalar(old($key, $details[$key] ?? $default)) ? old($key, $details[$key] ?? $default) : '';
     $delivery = $value('delivery_method', 'standard');
+    $savedAddress = auth()->user()->hasSavedDeliveryAddress();
+    $addressSource = $savedAddress ? $value('address_source', 'profile') : 'other';
+    $manualAddressDefault = $savedAddress ? '' : auth()->user()->street_address;
 @endphp
 <section class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
     <a href="{{ route('cart') }}" class="mb-6 inline-flex min-h-11 items-center rounded text-sm text-champagne-300">Kembali ke cart</a>
@@ -26,12 +29,31 @@
                     @endforeach
                 </fieldset>
                 @error('delivery_method')<p class="mt-2 text-sm text-red-300">{{ $message }}</p>@enderror
-                <div class="mt-6 space-y-5" data-delivery-address @if($delivery === 'pickup') hidden @endif>
-                    <p class="text-sm leading-6 text-stone-300">Pilih wilayah pengiriman dari daftar, lalu lengkapi alamat jalan dan kode pos.</p>
-                    <label class="block text-sm">Provinsi<select class="field mt-2 cursor-pointer" name="province" autocomplete="address-level1" data-region-province><option value="">Pilih provinsi</option>@foreach(array_keys($regions) as $province)<option value="{{ $province }}" @selected($value('province') === $province)>{{ $province }}</option>@endforeach</select>@error('province')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
-                    <label class="block text-sm">Kota / kabupaten<select class="field mt-2 cursor-pointer" name="city" autocomplete="address-level2" data-region-city><option value="">Pilih kota / kabupaten</option>@foreach($regions[$value('province')] ?? [] as $city)<option value="{{ $city }}" @selected($value('city') === $city)>{{ $city }}</option>@endforeach</select>@error('city')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
-                    <label class="block text-sm">Alamat jalan dan nomor rumah<textarea class="field mt-2" name="address" autocomplete="street-address" maxlength="500" rows="3" placeholder="Nama jalan, nomor rumah, RT/RW, dan kecamatan">{{ $value('address', auth()->user()->street_address) }}</textarea>@error('address')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
-                    <label class="block text-sm">Kode pos<input class="field mt-2" name="postal_code" autocomplete="postal-code" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" value="{{ $value('postal_code') }}">@error('postal_code')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
+                <div class="mt-6 space-y-4" data-delivery-address @if($delivery === 'pickup') hidden @endif>
+                    @if($savedAddress)
+                        <fieldset class="space-y-3">
+                            <legend class="mb-3 text-sm font-medium">Alamat pengiriman</legend>
+                            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 p-4 has-[:checked]:border-champagne-400/60 has-[:checked]:bg-champagne-400/5">
+                                <input class="mt-1 size-4 accent-champagne-400" type="radio" name="address_source" value="profile" @checked($addressSource === 'profile')>
+                                <span class="text-sm"><span class="block font-medium">Pakai alamat utama</span><span class="mt-2 block whitespace-pre-line break-words text-stone-300">{{ auth()->user()->street_address }}</span><span class="mt-1 block text-stone-300">{{ auth()->user()->address_city }}, {{ auth()->user()->address_province }} {{ auth()->user()->address_postal_code }}</span></span>
+                            </label>
+                            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 p-4 has-[:checked]:border-champagne-400/60 has-[:checked]:bg-champagne-400/5">
+                                <input class="size-4 accent-champagne-400" type="radio" name="address_source" value="other" @checked($addressSource === 'other')>
+                                <span class="text-sm font-medium">Kirim ke alamat lain</span>
+                            </label>
+                        </fieldset>
+                    @else
+                        <input type="hidden" name="address_source" value="other">
+                        <p class="text-sm leading-6 text-stone-300">Alamat utama belum lengkap. Isi alamat pengiriman di bawah, atau <a class="text-champagne-300 underline underline-offset-4" href="{{ route('profile.edit') }}">lengkapi profil</a> untuk checkout berikutnya.</p>
+                    @endif
+                    @error('address_source')<p class="text-sm text-red-300">{{ $message }}</p>@enderror
+                    <div class="space-y-5" data-manual-address @if($savedAddress && $addressSource === 'profile') hidden @endif>
+                        <p class="text-sm leading-6 text-stone-300">Pilih wilayah dari daftar, lalu isi alamat jalan dan kode pos.</p>
+                        <label class="block text-sm">Provinsi<select class="field mt-2 cursor-pointer" name="province" autocomplete="address-level1" data-region-province><option value="">Pilih provinsi</option>@foreach(array_keys($regions) as $province)<option value="{{ $province }}" @selected($value('province') === $province)>{{ $province }}</option>@endforeach</select>@error('province')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
+                        <label class="block text-sm">Kota / kabupaten<select class="field mt-2 cursor-pointer" name="city" autocomplete="address-level2" data-region-city><option value="">Pilih kota / kabupaten</option>@foreach($regions[$value('province')] ?? [] as $city)<option value="{{ $city }}" @selected($value('city') === $city)>{{ $city }}</option>@endforeach</select>@error('city')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
+                        <label class="block text-sm">Alamat jalan dan nomor rumah<textarea class="field mt-2" name="address" autocomplete="street-address" maxlength="500" rows="3" placeholder="Nama jalan, nomor rumah, RT/RW, dan kecamatan">{{ $value('address', $manualAddressDefault) }}</textarea>@error('address')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
+                        <label class="block text-sm">Kode pos<input class="field mt-2" name="postal_code" autocomplete="postal-code" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" value="{{ $value('postal_code') }}">@error('postal_code')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
+                    </div>
                 </div>
                 <noscript><p class="mt-4 text-sm text-stone-300">Alamat hanya wajib diisi untuk metode pengiriman.</p></noscript>
             </section>

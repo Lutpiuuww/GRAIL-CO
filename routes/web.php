@@ -50,6 +50,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('products.index');
         Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
         Route::resource('purchases', PurchaseController::class)->only(['index', 'create', 'store', 'show']);
+        Route::get('/sales/updates', [SaleController::class, 'updates'])->name('sales.updates');
         Route::resource('sales', SaleController::class)->only(['index', 'create', 'store', 'show']);
         Route::patch('/sales/{sale}/payment', [OrderManagementController::class, 'payment'])->name('sales.payment');
         Route::patch('/sales/{sale}/fulfillment', [OrderManagementController::class, 'fulfillment'])->name('sales.fulfillment');

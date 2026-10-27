@@ -14,13 +14,14 @@
             <label class="block text-sm sm:col-span-2">Product name<input class="field mt-2" name="name" value="{{ old('name', $product->name) }}" required>@error('name')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
             <label class="block text-sm sm:col-span-2">Description<textarea class="field mt-2 min-h-28" name="description">{{ old('description', $product->description) }}</textarea>@error('description')<span class="mt-2 block text-red-300">{{ $message }}</span>@enderror</label>
             <div class="grid gap-4 rounded-xl border border-white/10 bg-black/10 p-4 sm:col-span-2 sm:grid-cols-[128px_1fr] sm:items-center">
-                <div class="flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-obsidian-950 text-champagne-300">
+                <div class="flex aspect-[4/5] items-center justify-center overflow-hidden rounded-lg bg-obsidian-950 text-champagne-300">
                     @if($product->image_path)<img src="{{ asset($product->image_path) }}" alt="Foto produk saat ini" class="h-full w-full object-cover" data-product-image-preview>@else<span class="font-mono text-4xl" data-product-image-placeholder>G</span><img src="" alt="Pratinjau foto produk baru" class="hidden h-full w-full object-cover" data-product-image-preview>@endif
                 </div>
                 <div>
                     <label class="block text-sm font-medium" for="product-image">Foto produk</label>
-                    <input id="product-image" class="field mt-2 cursor-pointer text-sm file:mb-2 file:block file:rounded-lg file:border-0 file:bg-champagne-400/10 file:px-3 file:py-2 file:text-champagne-300" type="file" name="image" accept="image/jpeg,image/png,image/webp" data-product-image-input>
-                    <p class="mt-2 text-xs leading-5 text-stone-300">JPG, PNG, atau WebP; maksimal 4 MB, ukuran 400–4000 px. Foto baru menggantikan foto unggahan sebelumnya.</p>
+                    <input id="product-image" class="field mt-2 cursor-pointer text-sm file:mb-2 file:block file:rounded-lg file:border-0 file:bg-champagne-400/10 file:px-3 file:py-2 file:text-champagne-300" type="file" name="image" accept="image/*" data-product-image-input>
+                    <p class="mt-2 text-xs leading-5 text-stone-300">Foto dipotong otomatis ke rasio 4:5 dan diperkecil saat dipilih. Tidak ada batas dimensi minimum. Foto baru menggantikan foto unggahan sebelumnya.</p>
+                    <p class="mt-2 text-xs text-champagne-300" data-product-image-status role="status" aria-live="polite"></p>
                     @error('image')<span class="mt-2 block text-sm text-red-300">{{ $message }}</span>@enderror
                     @if($product->uploaded_image_path)<label class="mt-3 flex min-h-11 cursor-pointer items-center gap-2 text-sm text-stone-300"><input type="checkbox" name="remove_image" value="1" @checked(old('remove_image'))> Hapus foto unggahan dan gunakan gambar bawaan jika tersedia</label>@endif
                 </div>

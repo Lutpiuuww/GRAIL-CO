@@ -77,6 +77,22 @@ class AccountTest extends TestCase
         $this->assertSame($user->email, $user->fresh()->email);
     }
 
+    public function test_profile_can_save_a_complete_address_and_reject_wrong_city(): void
+    {
+        $user = User::factory()->create(['role' => 'customer']);
+        $data = [
+            'name' => $user->name, 'email' => $user->email,
+            'street_address' => 'Jalan Merdeka Nomor 10',
+            'address_province' => 'Jawa Barat', 'address_city' => 'Kota Bandung',
+            'address_postal_code' => '40111',
+        ];
+
+        $this->actingAs($user)->patch('/profile', $data)->assertSessionHasNoErrors();
+        $this->assertTrue($user->fresh()->hasSavedDeliveryAddress());
+        $this->patch('/profile', array_replace($data, ['address_city' => 'Kota Surabaya']))->assertSessionHasErrors('address_city');
+        $this->assertSame('Kota Bandung', $user->fresh()->address_city);
+    }
+
     public function test_login_is_limited_after_five_failures_and_recovers_after_timeout(): void
     {
         $user = User::factory()->create(['email' => 'limited@example.test']);

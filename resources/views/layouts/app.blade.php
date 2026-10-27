@@ -10,12 +10,11 @@
     <a href="{{ route('profile.edit') }}" class="rounded-lg px-3 py-2 text-sm text-stone-300 hover:text-white">Profile</a><a href="{{ route('orders') }}" class="rounded-lg px-3 py-2 text-sm text-stone-400 hover:text-white">My Orders</a><a href="{{ route('cart') }}" class="btn-ghost !px-3 !py-2 text-sm">Cart <span class="rounded-full bg-champagne-400 px-1.5 text-xs text-obsidian-950">{{ array_sum(session('cart', [])) }}</span></a><form method="POST" action="{{ route('logout') }}" data-logout>@csrf<button class="rounded-lg px-3 py-2 text-sm text-stone-400 hover:text-white">Logout</button></form>
     @else<a href="{{ route('login') }}" class="btn-gold !px-4 !py-2 text-sm">Masuk</a>@endauth</nav>
 </div></header>
-@if(session('success'))<div role="status" class="mx-auto mt-4 max-w-7xl px-4"><div class="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-300">{{ session('success') }}</div></div>@endif
-@if($errors->any())<div role="alert" class="mx-auto mt-4 max-w-7xl px-4"><div class="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">{{ $errors->first() }}</div></div>@endif
+@include('components.flash-messages')
 <main class="pb-24 md:pb-10">@yield('content')</main>
 <nav class="fixed inset-x-4 bottom-4 z-50 grid grid-cols-4 rounded-2xl border border-white/10 bg-obsidian-800/95 p-2 shadow-2xl backdrop-blur-xl md:hidden" aria-label="Navigasi mobile">
 @php($nav = [['catalog','Catalog','M4 6h16M4 12h16M4 18h16'],['cart','Cart','M3 3h2l.4 2M7 13h10l4-8H5.4M7 13 5.4 5M7 13l-2 2h14M9 19.5h.01M17 19.5h.01'],['orders','Orders','M9 12h6m-6 4h6M7 3h10a2 2 0 012 2v16l-4-2-3 2-3-2-4 2V5a2 2 0 012-2'],[auth()->check()?'profile.edit':'login',auth()->check()?'Profile':'Masuk','M20 21a8 8 0 10-16 0m8-9a4 4 0 100-8 4 4 0 000 8']])
 @foreach($nav as [$route,$label,$path]) @if(!auth()->check() && in_array($route,['cart','orders'])) @continue @endif
 <a href="{{ route($route) }}" class="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] {{ request()->routeIs($route) ? 'bg-white/10 text-champagne-300' : 'text-stone-400' }}"><svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="{{ $path }}"/></svg>{{ $label }}</a>@endforeach
-</nav>@include('components.logout-dialog')
+</nav>@include('components.logout-dialog')@include('components.confirm-dialog')
 </body></html>

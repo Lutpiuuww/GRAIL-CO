@@ -21,6 +21,9 @@
     .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-3 font-medium text-stone-200 transition-colors duration-200 hover:border-champagne-400/40 hover:bg-white/5 hover:text-champagne-300 motion-reduce:transition-none; }
     .field { @apply w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-stone-100 placeholder:text-stone-500 transition-colors focus:border-champagne-400 motion-reduce:transition-none; }
     .eyebrow { @apply font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-champagne-400; }
+    .notice-card { @apply flex items-start gap-3 rounded-2xl border bg-obsidian-900/95 p-4 shadow-2xl shadow-black/40 backdrop-blur-xl; }
+    .notice-card[hidden] { display: none; }
+    .notice-close { @apply -mr-1 -mt-1 grid size-9 shrink-0 place-items-center rounded-lg text-stone-400 transition-colors duration-200 hover:bg-white/10 hover:text-white motion-reduce:transition-none; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 @media print {

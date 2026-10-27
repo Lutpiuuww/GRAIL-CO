@@ -16,6 +16,7 @@
         @endunless
         <div class="flex items-end gap-2"><button class="btn-gold">Cari</button><a class="btn-ghost" href="{{ route($prefix.'.index') }}">Reset</a></div>
     </form>
+    <div @unless($isPurchase) data-sales-results @endunless>
     <div class="glass-panel mt-6 overflow-x-auto rounded-2xl"><table class="w-full min-w-[860px] text-left text-sm">
         <caption class="sr-only">Riwayat {{ $isPurchase ? 'Stock In' : 'Sales' }}</caption>
         <thead class="border-b border-white/10 text-stone-300"><tr><th scope="col" class="px-5 py-4">Nomor</th><th scope="col" class="px-5 py-4">{{ $isPurchase ? 'Supplier' : 'Pemilik / pencatat' }}</th><th scope="col" class="px-5 py-4">Tanggal</th><th scope="col" class="px-5 py-4">Total</th><th scope="col" class="px-5 py-4">Status</th><th scope="col" class="px-5 py-4">Aksi</th></tr></thead>
@@ -27,5 +28,6 @@
         </tr>@empty<tr><td colspan="6" class="px-5 py-12 text-center text-stone-300">Tidak ada transaksi yang sesuai filter.</td></tr>@endforelse</tbody>
     </table></div>
     <div class="mt-6">{{ $records->links() }}</div>
+    </div>
 </section>
 @endsection

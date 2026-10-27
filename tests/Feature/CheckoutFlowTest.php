@@ -47,6 +47,59 @@ class CheckoutFlowTest extends TestCase
             ->assertOk()->assertSee('value="081234567890"', false)->assertSee('Jalan Merdeka Nomor 10');
     }
 
+    public function test_saved_profile_address_is_default_and_server_ignores_forged_manual_address(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'customer', 'phone' => '081234567890',
+            'street_address' => 'Jalan Merdeka Nomor 10',
+            'address_province' => 'Jawa Barat', 'address_city' => 'Kota Bandung',
+            'address_postal_code' => '40111',
+        ]);
+        $product = $this->product();
+        $this->actingAs($user)->withSession(['cart' => [$product->id => 1]])->get('/checkout')
+            ->assertOk()->assertSee('Pakai alamat utama')->assertSee('Kirim ke alamat lain');
+
+        $this->post('/checkout/review', $this->checkoutData([
+            'delivery_method' => 'standard', 'address_source' => 'profile',
+            'address' => 'Jalan Palsu Nomor 99', 'province' => 'Jawa Timur',
+            'city' => 'Kota Surabaya', 'postal_code' => '60211',
+        ]))->assertSessionHasNoErrors();
+        $this->assertSame('Jalan Merdeka Nomor 10', session('checkout.draft.details.address'));
+        $this->assertSame('Kota Bandung', session('checkout.draft.details.city'));
+        $this->get('/checkout/review')->assertOk()->assertSee('Jalan Merdeka Nomor 10')->assertDontSee('Jalan Palsu');
+    }
+
+    public function test_customer_can_choose_a_different_address_without_changing_profile(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'customer', 'street_address' => 'Jalan Merdeka Nomor 10',
+            'address_province' => 'Jawa Barat', 'address_city' => 'Kota Bandung',
+            'address_postal_code' => '40111',
+        ]);
+        $product = $this->product();
+        $this->actingAs($user);
+        $token = $this->prepareCheckout([$product->id => 1], [
+            'delivery_method' => 'standard', 'address_source' => 'other',
+            'address' => 'Jalan Mawar Nomor 20', 'province' => 'Jawa Timur',
+            'city' => 'Kota Surabaya', 'postal_code' => '60211',
+        ]);
+        $this->post('/checkout', ['submission_token' => $token])->assertSessionHasNoErrors();
+        $this->assertSame('Jalan Mawar Nomor 20', Sale::firstOrFail()->delivery_details['address']);
+        $this->assertSame('Jalan Merdeka Nomor 10', $user->fresh()->street_address);
+    }
+
+    public function test_incomplete_profile_address_cannot_be_selected_as_saved_address(): void
+    {
+        $user = User::factory()->create(['role' => 'customer', 'street_address' => 'Jalan Merdeka Nomor 10']);
+        $product = $this->product();
+        $this->actingAs($user)->withSession(['cart' => [$product->id => 1]])->get('/checkout')
+            ->assertOk()->assertDontSee('Pakai alamat utama')->assertSee('lengkapi profil');
+        $this->post('/checkout/review', $this->checkoutData([
+            'delivery_method' => 'standard', 'address_source' => 'profile',
+        ]))->assertSessionHasErrors('address_source');
+        $this->assertDatabaseCount('sales', 0);
+    }
+
     public function test_shipping_address_and_valid_contact_are_required_for_delivery(): void
     {
         $this->actingAs(User::factory()->create(['role' => 'customer']));
@@ -101,9 +154,13 @@ class CheckoutFlowTest extends TestCase
 
     public function test_pickup_discards_address_and_has_no_shipping_charge(): void
     {
-        $this->actingAs(User::factory()->create(['role' => 'customer']));
+        $this->actingAs(User::factory()->create([
+            'role' => 'customer', 'street_address' => 'Jalan Merdeka Nomor 10',
+            'address_province' => 'Jawa Barat', 'address_city' => 'Kota Bandung',
+            'address_postal_code' => '40111',
+        ]));
         $product = $this->product();
-        $token = $this->prepareCheckout([$product->id => 1], ['address' => 'Stale address should not be retained']);
+        $token = $this->prepareCheckout([$product->id => 1], ['address_source' => 'profile', 'address' => 'Stale address should not be retained']);
         $this->post('/checkout', ['submission_token' => $token])->assertSessionHasNoErrors();
         $sale = Sale::firstOrFail();
         $this->assertSame('0.00', $sale->shipping_cost);

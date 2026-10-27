@@ -52,6 +52,23 @@ class ProductMediaArchiveTest extends TestCase
         Storage::disk('product_images')->assertMissing($secondPath);
     }
 
+    public function test_photo_smaller_than_previous_dimension_limit_can_be_uploaded(): void
+    {
+        $chunk = static fn (string $type, string $body): string => pack('N', strlen($body)).$type.$body.pack('N', crc32($type.$body));
+        $png = "\x89PNG\r\n\x1a\n"
+            .$chunk('IHDR', pack('NNCCCCC', 1, 1, 8, 2, 0, 0, 0))
+            .$chunk('IDAT', gzcompress("\x00\xff\x00\x00"))
+            .$chunk('IEND', '');
+        $photo = UploadedFile::fake()->createWithContent('tiny.png', $png);
+
+        $this->actingAs(User::factory()->create(['role' => 'admin']))
+            ->post('/products', $this->data() + ['image' => $photo])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/products');
+
+        Storage::disk('product_images')->assertExists(Product::firstOrFail()->uploaded_image_path);
+    }
+
     public function test_invalid_photo_is_rejected_and_staff_cannot_upload(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);

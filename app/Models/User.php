@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Support\IndonesianRegions;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,6 +25,9 @@ class User extends Authenticatable
         'email',
         'phone',
         'street_address',
+        'address_province',
+        'address_city',
+        'address_postal_code',
         'password',
         'role',
         'is_active',
@@ -68,5 +72,13 @@ class User extends Authenticatable
     public function isBackOffice(): bool
     {
         return in_array($this->role, ['admin', 'staff'], true);
+    }
+
+    public function hasSavedDeliveryAddress(): bool
+    {
+        return filled($this->street_address)
+            && in_array($this->address_province, IndonesianRegions::provinces(), true)
+            && in_array($this->address_city, IndonesianRegions::cities($this->address_province), true)
+            && preg_match('/^[0-9]{5}$/', (string) $this->address_postal_code) === 1;
     }
 }

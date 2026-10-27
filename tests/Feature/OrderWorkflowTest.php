@@ -231,4 +231,25 @@ class OrderWorkflowTest extends TestCase
         $this->assertNull($sale->fresh()->fulfillment_status);
         $this->assertNull($sale->fresh()->payment_status);
     }
+
+    public function test_back_office_live_sales_summary_tracks_new_and_processed_orders(): void
+    {
+        $this->actingAs($this->staff)->getJson('/sales/updates')
+            ->assertOk()->assertJsonPath('pending_count', 0)->assertJsonPath('latest_order_id', 0);
+
+        $sale = $this->order();
+        $this->get('/sales')->assertOk()->assertSee('data-sales-live', false)->assertSee('data-sales-results', false);
+        $before = $this->getJson('/sales/updates')->assertOk()
+            ->assertJsonPath('pending_count', 1)
+            ->assertJsonPath('latest_order_id', $sale->id)
+            ->json('revision');
+        $this->actingAs($this->customer)->getJson('/sales/updates')->assertForbidden();
+        $this->actingAs(User::factory()->create(['role' => 'admin']))->getJson('/sales/updates')->assertOk();
+
+        $this->actingAs($this->staff);
+        $this->payment($sale);
+        $this->advance($sale, 'processing');
+        $after = $this->getJson('/sales/updates')->assertOk()->assertJsonPath('pending_count', 0)->json('revision');
+        $this->assertNotSame($before, $after);
+    }
 }
